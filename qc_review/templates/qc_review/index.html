@@ -1,0 +1,37 @@
+{% extends "qc_review/base.html" %}
+
+{% block content %}
+<div class="content-section">
+  <div class="content">
+    <h1>{{ run.codeline}} {{ run.cl }}</h1>
+    <dl class="row">
+      <dt class="col-sm-3">Start Time</dt>
+      <dt class="col-sm-9">{{ run.start_time }}</dt>
+      <dt class="col-sm-3">End Time</dt>
+      <dt class="col-sm-9">{{ run.end_time }}</dt>
+      <dt class="col-sm-3">Elapsed Time</dt>
+      <dt class="col-sm-9">{{ run.elapsed_time }}</dt>
+    </dl>
+  </div>
+  <table class="table table-hover table-bordered table-sm">
+    <thead class="thead-dark">
+      <th scope="col">Suite</th>
+      <th scope="col">Pass</th>
+      <th scope="col">Fail</th>
+      <th scope="col">Error</th>
+      <th scope="col">Time</th>
+    </thead>
+    <tbody>
+    {% for suite in run.suiterun_set.all %}
+      <tr>
+        <th scope="row">{{ suite.suite_name }}</th>
+        <td>{{ suite.num_passed }}</td>
+        <td>{{ suite.num_failed }}</td>
+        <td>{{ suite.num_error }}</td>
+        <td>{{ suite.elapsed_time }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock content %}

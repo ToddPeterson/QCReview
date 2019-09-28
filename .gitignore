@@ -1,0 +1,4 @@
+env.ps1
+db.*
+*.py[cod]
+__pycache__/

@@ -1,0 +1,94 @@
+{% extends "qc_review/base.html" %}
+{% load static %}
+
+{% block javascript %}
+<script src="{% static 'qc_review/js/elapsed_time_chart.js' %}" type="text/javascript"></script>
+<script src="{% static 'qc_review/js/pass_fail_donut.js' %}" type="text/javascript"></script>
+<script src="{% static 'qc_review/js/history_chart.js' %}" type="text/javascript"></script>
+<script>
+  $(document).ready(function() {
+    var endpoint = '/api/suite/data/?id={{ object.id }}'
+    $.ajax({
+      method: "GET",
+      url: endpoint,
+      success: function(data){
+        setElapsedTimeChart('elapsedTimeChart', data.elapsed_labels, data.elapsed_data)
+        setPassFailChart('passFailChart', data.pf_labels, data.pf_data)
+        setHistoryChart('historyChart', data.hist_labels, data.hist_pass_data, data.hist_fail_data)
+      },
+      error: function(error_data){
+        console.log("error")
+        console.log(error_data)
+      }
+    })
+  })
+</script>
+{% endblock javascript %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h2">{{ object.suite_name }} {{ object.qc_run.cl }}</h1>
+  </div>
+  <div class="row">
+    {% for h in highlights %}
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-{{ h.style }} shadow h-100 py-2">
+        <div class="row align-items-center">
+          <div class="col">
+            <div class="text-xs font-weight-bold text-{{ h.style }} text-uppercase mb-1">{{ h.title }}</div>
+            <div class="h5 mb-0">{{ h.message }}</div>
+          </div>
+          <div class="col-auto mr-2">
+            <i class="fas {{ h.icon }} fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="row">
+    <div class="col-xl-4 col-lg-5">
+      <div class="card shadow mb-4">
+        <div class="card-header">
+          <h6 class="m-0 font-weight-bold text-primary">Pass/Fail</h6>
+        </div>
+        <div class="card-body">
+          <div class="pt-4">
+            <canvas id="passFailChart"></canvas>
+          </div>
+          <hr>
+          <dl class="row">
+            <dt class="col-sm-4">Passed</dt>
+            <dt class="col-sm-5">{{ object.num_passed }}</dt>
+            <dt class="col-sm-4">Failed</dt>
+            <dt class="col-sm-5">{{ object.num_failed }}</dt>
+            <dt class="col-sm-4">Error</dt>
+            <dt class="col-sm-5">{{ object.num_error }}</dt>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-8 col-lg-7">
+      <div class="card shadow mb-4">
+        <div class="card-header">
+          <h6 class="m-0 font-weight-bold text-primary">Elapsed Time</h6>
+        </div>
+        <div class="card-body">
+          <canvas id="elapsedTimeChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="card shadow mb-4">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">History</h6>
+        </div>
+        <div class="card-body">
+          <canvas id="historyChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

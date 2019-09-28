@@ -1,0 +1,93 @@
+{% extends "qc_review/base.html" %}
+
+{% block content %}
+<div class="content">
+  <div class="content mt-3">
+    <form class="form-inline" method="POST">
+      {% csrf_token %}
+      <fieldset class="form-group">
+      {% for field in form %}
+        <div class="input-group mr-3">
+          {{ field.errors }}
+          {{ field.label_tag }} {{ field }}
+        </div>
+      {% endfor %}
+      </fieldset>
+      <div class="form-group">
+        <button class="btn btn-outline-info" type="submit">Submit</button>
+      </div>
+    </form>
+  </div>
+  <div class="content">
+    <h1>{{ run.codeline }} {{ run.cl }}</h1>
+    <dl class="row">
+      <dt class="col-sm-3">Start Time</dt>
+      <dt class="col-sm-9">{{ run.start_time }}</dt>
+      <dt class="col-sm-3">End Time</dt>
+      <dt class="col-sm-9">{{ run.end_time }}</dt>
+      <dt class="col-sm-3">Elapsed Time</dt>
+      <dt class="col-sm-9">{{ run.elapsed_time }}</dt>
+    </dl>
+  </div>
+  <table class="table table-hover table-bordered table-sm">
+    <thead class="thead-dark">
+      <th scope="col">Suite</th>
+      <th scope="col">Pass</th>
+      <th scope="col">Fail</th>
+      <th scope="col">Error</th>
+      <th scope="col">Time</th>
+    </thead>
+    <tbody>
+    {% for suite in run.ordered_suiterun_set.all %}
+      <tr data-href="{% url 'qc_review:suite-detail' suite.id %}">
+        <th scope="row">{{ suite.suite_name }}</th>
+        <td>{{ suite.num_passed }}</td>
+        <td>{{ suite.num_failed }}</td>
+        <td>{{ suite.num_error }}</td>
+        <td>{{ suite.elapsed_time }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock content %}
+
+{% block javascript %}
+<script>
+  $(document).ready(function() {
+    $(document.body).on("click", "tr[data-href]", function() {
+      window.location.href = this.dataset.href;
+    });
+    getChangelists()
+  });
+
+  function getChangelists() {
+    codeline = $('select[name=codeline]').val();
+    request_url = '/api/runs/data/?codeline=' + codeline;
+    $.ajax({
+      url: request_url,
+      success: function(data){
+        var select = $('select[name=changelist]')
+        select.empty()
+        $.each(data.cl_nums, function(index, text){
+          select.append(
+            $('<option></option>').val(text).html(text)
+          )
+        })
+      }
+    })
+  }
+
+  $('select[name=codeline]').change(function() {
+    getChangelists()
+  })
+</script>
+{% endblock javascript %}
+
+{% block style %}
+<style>
+  tr[data-href] {
+    cursor: pointer;
+  }
+</style>
+{% endblock style %}
